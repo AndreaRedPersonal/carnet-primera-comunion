@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Carnet Primera Comunión</title>
-
+  
 <style>
 body{
   margin:0;
@@ -23,7 +23,7 @@ body{
 }
 
 .lado-der{
-  width:350px;
+  width:800px;
 }
 
 .logo{
@@ -123,7 +123,7 @@ input[type="text"]{
 }
 .nombre{
   position:absolute;
-  bottom:39px;
+  bottom:45px;
   left:100px;
   width:200px;
   text-align:center;
@@ -134,7 +134,7 @@ input[type="text"]{
 
 .catequista{
   position:absolute;
-  bottom:10px;
+  bottom:15px;
   left:100px;
   width:200px;
   text-align:center;
@@ -143,11 +143,10 @@ input[type="text"]{
 }
 /* CONTENEDOR 3D */
 .carnet-container{
-  perspective:1000px;
   display:flex;
+  gap:30px;
   justify-content:center;
 }
-
 /* TARJETA */
 .carnet{
   width:300px;
@@ -159,16 +158,12 @@ input[type="text"]{
 }
 
 /* CUANDO GIRA */
-.carnet.girar{
-  transform:rotateY(180deg);
-}
 
 /* CARAS */
 .cara{
-  position:absolute;
-  width:100%;
-  height:100%;
-  backface-visibility:hidden;
+  width:300px;
+  height:500px;
+  position:relative;
   border-radius:15px;
   overflow:hidden;
 }
@@ -181,9 +176,24 @@ input[type="text"]{
 
 /* ATRÁS */
 .atras{
-  background-image:url('carnet-atras.png'); /* crea esta imagen */
+  background-image:url('carnet-atras.png');
   background-size:cover;
-  transform:rotateY(180deg);
+}
+.qr-box{
+  position:absolute;
+  top:380px;
+  left:110px;
+  width:100px;
+  height:100px;
+}
+.datos-atras{
+position:absolute;
+top:58px;
+left:110px;
+width:200px;
+text-align:left;
+font-size:14px;
+color:#333;
 }
 </style>
 </head>
@@ -208,13 +218,29 @@ input[type="text"]{
     <div class="pregunta">
       <div class="numero">2</div>
       <div>
-        <p>¿Cómo se llama tu catequista?</p>
-        <input type="text" id="catequista">
+        <p>¿Cuál es tu DNI?</p>
+        <input type="text" id="dni">
       </div>
     </div>
 
     <div class="pregunta">
       <div class="numero">3</div>
+      <div>
+        <p>¿Nombre del padre/madre o apoderado?</p>
+        <input type="text" id="padre">
+      </div>
+    </div>
+
+    <div class="pregunta">
+      <div class="numero">4</div>
+      <div>
+        <p>¿Cuál es el teléfono de tu padre o apoderado?</p>
+        <input type="text" id="telefono">
+      </div>
+    </div>
+
+    <div class="pregunta">
+      <div class="numero">5</div>
       <div>
         <p>Sube tu mejor foto</p>
 
@@ -239,45 +265,64 @@ input[type="text"]{
       ¡Llena los datos correctamente, sube tu foto y listo!
     </p>
 
-<div class="carnet-container">
-  <div class="carnet" id="carnet">
+<div class="carnet-container" id="carnet">
 
-    <!-- FRENTE -->
-    <div class="cara frente">
-      <div class="foto">
-        <img id="previewFoto">
-      </div>
-      <div class="nombre" id="previewNombre"></div>
-      <div class="catequista" id="previewCatequista"></div>
+  <!-- CARNET FRENTE -->
+  <div class="cara frente">
+    <div class="foto">
+      <img id="previewFoto">
     </div>
-
-    <!-- ATRÁS -->
-    <div class="cara atras">
-    </div>
-
+    <div class="nombre" id="previewNombre"></div>
+    <div class="catequista" id="previewCatequista"></div>
   </div>
+
+  <!-- CARNET ATRÁS -->
+  <div class="cara atras">
+
+<div class="datos-atras">
+<p id="previewPadre"></p>
+<p id="previewTelefono"></p>
 </div>
 
-    <div class="slider-box">
-      <p>Ajusta el tamaño de tu foto</p>
-      <input type="range" id="zoom" min="1" max="2" step="0.1" value="1">
+    <div class="qr-box">
+      <div id="qrcode"></div>
     </div>
-
-    <button class="guardar">¡Guardar mi carnet!</button>
-
   </div>
 
 </div>
+
+
+<div class="slider-box">
+<p>Ajusta el tamaño de tu foto</p>
+<input type="range" id="zoom" min="1" max="2" step="0.1" value="1">
+</div>
+
+<button class="guardar" onclick="guardarCarnet()">¡Guardar mi carnet!</button>
+
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <script>
 
 // Vista previa nombre
 document.getElementById("nombre").addEventListener("input", function(){
+
+  const nombre = this.value;
+
   document.getElementById("previewNombre").innerText =
-  this.value.toUpperCase();
+  nombre.toUpperCase();
+
+  if(nombre.length > 3){
+    generarQR(nombre);
+  }
+
 });
 
-// Vista previa catequista
-document.getElementById("catequista").addEventListener("input", function(){
+// Vista previa DNI
+document.getElementById("dni").addEventListener("input", function(){
   document.getElementById("previewCatequista").innerText =
   this.value;
 });
@@ -297,11 +342,60 @@ document.getElementById("zoom").addEventListener("input", function(){
   "scale(" + this.value + ")";
 });
 
-// Giro del carnet
-document.getElementById("carnet").addEventListener("click", function(){
-  this.classList.toggle("girar");
+// Nombre del padre
+document.getElementById("padre").addEventListener("input", function(){
+  document.getElementById("previewPadre").innerText = this.value;
 });
+
+// Teléfono
+document.getElementById("telefono").addEventListener("input", function(){
+  document.getElementById("previewTelefono").innerText = this.value;
+});
+
+// Giro del carnet
+
+function generarQR(nombre){
+
+  const idUnico = "COM-" + Math.floor(Math.random() * 100000);
+
+  const dni = document.getElementById("dni").value;
+
+const enlace = "https://script.google.com/macros/s/AKfycbxGWzRrtA-CzTvr9kxDP6_I8McpRgNOcE7dPD_cVoRRjIMZtgws8INwvbKvcC1uUr_qzQ/exec?dni=" + dni;
+
+  document.getElementById("qrcode").innerHTML = "";
+
+new QRCode(document.getElementById("qrcode"), {
+  text: enlace,
+  width: 90,
+  height: 90
+});
+}
+
+function guardarCarnet(){
+
+html2canvas(document.getElementById("carnet")).then(canvas => {
+
+let imagen = canvas.toDataURL("image/png");
+
+fetch("AQUI_VA_TU_SCRIPT_DRIVE",{
+method:"POST",
+body:JSON.stringify({
+imagen:imagen
+})
+})
+.then(res=>res.text())
+.then(data=>{
+alert("Carnet guardado correctamente");
+});
+
+});
+
+}
+
 </script>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
 </body>
+
 </html>
