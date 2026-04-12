@@ -375,8 +375,6 @@ function generarQR() {
 
   new QRCode(document.getElementById("qrcode"), {
     text: enlace,
-    width: 120, // Lo hacemos un poco más grande para que no se vea borroso
-    height: 120,
     correctLevel : QRCode.CorrectLevel.H // Máxima calidad de lectura
   });
 }
