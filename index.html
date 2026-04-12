@@ -364,19 +364,26 @@ document.getElementById("dni").addEventListener("input", function(){
 function generarQR() {
   const dni = document.getElementById("dni").value;
   const nombre = document.getElementById("nombre").value;
-  
-  // Usamos tu URL real del script
-  const miUrl = "https://script.google.com/macros/s/AKfycbwpQJqz9pnXTSsvfgUp6LuY7IRslhJKDSliTJS77c_Q1jG-81Hx0U28xZJD5UU354OjPg/exec";
-  
-  // Creamos el enlace que llevará el QR
+  const miUrl = "https://script.google.com/macros/s/AKfycbwpQJqz9pnXTSsvfgUp6LuY7IRslhJKDSliTJS77c_Q1jG-81Hx0U28xZJD5UU354OjPg/exec"; 
   const enlace = miUrl + "?dni=" + dni + "&nombre=" + encodeURIComponent(nombre);
 
   document.getElementById("qrcode").innerHTML = "";
 
   new QRCode(document.getElementById("qrcode"), {
     text: enlace,
-    correctLevel : QRCode.CorrectLevel.H // Máxima calidad de lectura
+    width: 300,  // Generamos a 300px (mucha calidad)
+    height: 300, // Aunque el CSS lo vea de 120px
+    correctLevel : QRCode.CorrectLevel.H
   });
+
+  // Este truco ayuda a que el QR se adapte al contenedor pequeño sin perder calidad
+  setTimeout(() => {
+     const qrImg = document.querySelector("#qrcode img");
+     if(qrImg) {
+       qrImg.style.width = "100%";
+       qrImg.style.height = "100%";
+     }
+  }, 50);
 }
 function guardarCarnet() {
   const boton = document.querySelector(".guardar");
