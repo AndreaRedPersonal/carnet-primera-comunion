@@ -371,8 +371,7 @@ function generarQR() {
 
   new QRCode(document.getElementById("qrcode"), {
     text: enlace,
-    width: 300,  // Generamos a 300px (mucha calidad)
-    height: 300, // Aunque el CSS lo vea de 120px
+    
     correctLevel : QRCode.CorrectLevel.H
   });
 
