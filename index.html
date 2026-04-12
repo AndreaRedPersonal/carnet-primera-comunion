@@ -371,32 +371,55 @@ new QRCode(document.getElementById("qrcode"), {
 });
 }
 
-function guardarCarnet(){
+function guardarCarnet() {
+  const boton = document.querySelector(".guardar");
+  boton.innerText = "Guardando... espere";
+  boton.disabled = true;
 
-html2canvas(document.getElementById("carnet")).then(canvas => {
+  // Usamos html2canvas para convertir el DIV en imagen
+  // Agregamos opciones para mejorar la calidad y evitar errores de carga
+  html2canvas(document.getElementById("carnet"), {
+    useCORS: true,
+    scale: 2 // Mayor resolución
+  }).then(canvas => {
+    
+    let imagen = canvas.toDataURL("image/png");
+    let dni = document.getElementById("dni").value;
 
-let imagen = canvas.toDataURL("image/png");
-let dni = document.getElementById("dni").value;
+    if(!dni) {
+      alert("Por favor, ingresa el DNI antes de guardar.");
+      boton.disabled = false;
+      boton.innerText = "¡Guardar mi carnet!";
+      return;
+    }
 
-fetch("https://script.google.com/macros/s/AKfycbwpQJqz9pnXTSsvfgUp6LuY7IRslhJKDSliTJS77c_Q1jG-81Hx0U28xZJD5UU354OjPg/exec",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-imagen: imagen,
-dni: dni
-})
-})
-.then(()=>{
-alert("Carnet enviado correctamente");
-})
-.catch(error=>{
-console.log(error);
-});
+    // REEMPLAZA ESTA URL con la que copiaste de Google Apps Script
+    const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzNaq68U8NHoQAQszgqAHfwQ-Ds1HMd_uy_R1Y1V8hjdVIq541gJbLHVRdO_ab31uINww/exec";
 
-});
-
+    fetch(URL_SCRIPT, {
+      method: "POST",
+      body: JSON.stringify({
+        imagen: imagen,
+        dni: dni
+      })
+    })
+    .then(res => res.json())
+    .then(response => {
+      if(response.status === "success") {
+        alert("¡Carnet guardado con éxito en tu Google Drive!");
+      } else {
+        alert("Error al guardar: " + response.message);
+      }
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("Hubo un error en la conexión.");
+    })
+    .finally(() => {
+      boton.disabled = false;
+      boton.innerText = "¡Guardar mi carnet!";
+    });
+  });
 }
 
 </script>
