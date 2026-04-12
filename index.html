@@ -315,10 +315,6 @@ document.getElementById("nombre").addEventListener("input", function(){
   document.getElementById("previewNombre").innerText =
   nombre.toUpperCase();
 
-  if(nombre.length > 3){
-    generarQR(nombre);
-  }
-
 });
 
 // Vista previa DNI
@@ -352,25 +348,38 @@ document.getElementById("telefono").addEventListener("input", function(){
   document.getElementById("previewTelefono").innerText = this.value;
 });
 
+// Actualiza el nombre y genera el QR
+document.getElementById("nombre").addEventListener("input", function(){
+  document.getElementById("previewNombre").innerText = this.value.toUpperCase();
+  generarQR(); // Llamamos a la función
+});
+
+// NUEVO: Agrega esto para que el QR también se cree al escribir el DNI
+document.getElementById("dni").addEventListener("input", function(){
+  document.getElementById("previewCatequista").innerText = this.value;
+  generarQR(); // Llamamos a la función
+});
 // Giro del carnet
 
-function generarQR(nombre){
-
-  const idUnico = "COM-" + Math.floor(Math.random() * 100000);
-
+function generarQR() {
   const dni = document.getElementById("dni").value;
-
-const enlace = "https://script.google.com/macros/s/AKfycbwpQJqz9pnXTSsvfgUp6LuY7IRslhJKDSliTJS77c_Q1jG-81Hx0U28xZJD5UU354OjPg/exec?dni=" + dni;
+  const nombre = document.getElementById("nombre").value;
+  
+  // Usamos tu URL real del script
+  const miUrl = "https://script.google.com/macros/s/AKfycbwpQJqz9pnXTSsvfgUp6LuY7IRslhJKDSliTJS77c_Q1jG-81Hx0U28xZJD5UU354OjPg/exec";
+  
+  // Creamos el enlace que llevará el QR
+  const enlace = miUrl + "?dni=" + dni + "&nombre=" + encodeURIComponent(nombre);
 
   document.getElementById("qrcode").innerHTML = "";
 
-new QRCode(document.getElementById("qrcode"), {
-  text: enlace,
-  width: 90,
-  height: 90
-});
+  new QRCode(document.getElementById("qrcode"), {
+    text: enlace,
+    width: 120, // Lo hacemos un poco más grande para que no se vea borroso
+    height: 120,
+    correctLevel : QRCode.CorrectLevel.H // Máxima calidad de lectura
+  });
 }
-
 function guardarCarnet() {
   const boton = document.querySelector(".guardar");
   boton.innerText = "Guardando... espere";
@@ -380,7 +389,7 @@ function guardarCarnet() {
   // Agregamos opciones para mejorar la calidad y evitar errores de carga
   html2canvas(document.getElementById("carnet"), {
     useCORS: true,
-    scale: 2 // Mayor resolución
+    scale: 4 // Mayor resolución
   }).then(canvas => {
     
     let imagen = canvas.toDataURL("image/png");
